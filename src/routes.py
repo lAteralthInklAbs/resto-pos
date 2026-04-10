@@ -114,7 +114,7 @@ def new_order():
         db.session.add(order)
 
         for menu_item_id, quantity in quantities.items():
-            menu_item = MenuItem.query.get(menu_item_id)
+            menu_item = db.session.get(MenuItem, menu_item_id)
             order_item = OrderItem(
                 order=order,
                 menu_item_id=menu_item_id,

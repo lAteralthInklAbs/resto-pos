@@ -142,8 +142,13 @@ class TestReceiptRoutes:
             menu_item = MenuItem.query.first()
             order = Order(status="paid")
             db.session.add(order)
+            db.session.commit()  # Commit to get order.id
+
             order_item = OrderItem(
-                order=order, menu_item_id=menu_item.id, quantity=1, unit_price=menu_item.price
+                order_id=order.id,
+                menu_item_id=menu_item.id,
+                quantity=1,
+                unit_price=menu_item.price,
             )
             db.session.add(order_item)
 
