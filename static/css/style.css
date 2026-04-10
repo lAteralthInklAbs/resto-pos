@@ -1,0 +1,148 @@
+/* RestoPoS - Restaurant Theme
+   Color Scheme: Warm orange (#E67E22), white content, green buttons (#27AE60)
+*/
+
+:root {
+    --primary-orange: #E67E22;
+    --primary-green: #27AE60;
+    --dark-brown: #8B4513;
+    --light-cream: #FFF8E7;
+}
+
+/* Override Bootstrap primary color */
+.bg-primary {
+    background-color: var(--primary-orange) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-orange);
+    border-color: var(--primary-orange);
+}
+
+.btn-primary:hover {
+    background-color: #D35400;
+    border-color: #D35400;
+}
+
+.text-primary {
+    color: var(--primary-orange) !important;
+}
+
+/* Success/Action buttons */
+.btn-success {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+.btn-success:hover {
+    background-color: #219A52;
+    border-color: #219A52;
+}
+
+/* Navbar styling */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+/* Card styling */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Menu item cards */
+.menu-item {
+    border-left: 4px solid var(--primary-orange);
+    transition: border-color 0.2s;
+}
+
+.menu-item:hover {
+    border-left-color: var(--primary-green);
+}
+
+/* Quantity input */
+.qty-input {
+    text-align: center;
+}
+
+/* Receipt styling */
+.receipt {
+    background-color: #FAFAFA;
+    font-family: 'Courier New', monospace;
+}
+
+.receipt hr {
+    border-style: dashed;
+}
+
+/* Footer */
+.footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Form styling */
+.form-control:focus {
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25);
+}
+
+/* Print styles */
+@media print {
+    .navbar,
+    .footer,
+    .no-print {
+        display: none !important;
+    }
+
+    .receipt {
+        box-shadow: none;
+        border: none;
+    }
+
+    .card {
+        box-shadow: none;
+    }
+
+    body {
+        font-size: 12pt;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-card .card-body {
+        padding: 2rem !important;
+    }
+
+    .dashboard-card h3 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Table styling */
+.table th {
+    background-color: var(--light-cream);
+}
+
+.table-success {
+    background-color: rgba(39, 174, 96, 0.1) !important;
+}
