@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestoPoS - Interactive Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #E67E22;
+            --primary-green: #27AE60;
+        }
+        body { min-height: 100vh; background: linear-gradient(135deg, #FFF8E7 0%, #FFFFFF 100%); }
+        .navbar { background-color: var(--primary-orange) !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn-success { background-color: var(--primary-green); border-color: var(--primary-green); }
+        .btn-success:hover { background-color: #219A52; border-color: #219A52; }
+        .card { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .menu-item { border-left: 4px solid var(--primary-orange); margin-bottom: 10px; transition: all 0.2s; }
+        .menu-item:hover { border-left-color: var(--primary-green); transform: translateX(5px); }
+        .dashboard-btn { transition: transform 0.2s; cursor: pointer; }
+        .dashboard-btn:hover { transform: translateY(-5px); }
+        .category-header { color: var(--primary-orange); border-bottom: 2px solid var(--primary-orange); padding-bottom: 5px; }
+        .receipt-box { background: #FAFAFA; font-family: 'Courier New', monospace; }
+        .receipt-box hr { border-style: dashed; }
+        .qty-input { width: 60px; text-align: center; }
+        .order-summary { position: sticky; top: 20px; }
+        .demo-banner { background: var(--primary-orange); color: white; padding: 8px; font-size: 0.9rem; }
+        @media print { .no-print, .navbar, .demo-banner { display: none !important; } }
+    </style>
+</head>
+<body>
+    <div class="demo-banner text-center">
+        RestoPoS - Interactive Demo | No server required |
+        <a href="https://github.com/lAteralthInklAbs/resto-pos" class="text-white">View Source on GitHub</a>
+    </div>
+
+    <nav class="navbar navbar-dark">
+        <div class="container">
+            <span class="navbar-brand fw-bold">RestoPoS</span>
+            <span class="text-white" id="navUser"></span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Screen 1: Login -->
+        <div id="loginScreen" class="screen active">
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header text-center text-white" style="background: var(--primary-orange);">
+                            <h3>RestoPoS</h3>
+                            <p class="mb-0">Cashier Login</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" id="loginUsername" value="admin">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" value="admin">
+                            </div>
+                            <button class="btn btn-success w-100 py-2" onclick="doLogin()">Login</button>
+                            <p class="text-muted text-center mt-2 small">Any credentials work for demo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Dashboard -->
+        <div id="dashboardScreen" class="screen">
+            <div class="text-center mb-4">
+                <h2>Welcome, Cashier!</h2>
+                <p class="text-muted">Restaurant Point of Sale System</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card dashboard-btn h-100 text-center" onclick="showScreen('customerScreen')">
+                                <div class="card-body py-5">
+                                    <h3>New Customer</h3>
+                                    <p class="text-muted">Register a customer</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card dashboard-btn h-100 text-center bg-success text-white" onclick="showScreen('orderScreen')">
+                                <div class="card-body py-5">
+                                    <h3>New Order</h3>
+                                    <p>Create a new order</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card dashboard-btn h-100 text-center bg-secondary text-white">
+                                <div class="card-body py-5">
+                                    <h3>View Orders</h3>
+                                    <p>Coming soon</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card dashboard-btn h-100 text-center bg-danger text-white" onclick="doLogout()">
+                                <div class="card-body py-5">
+                                    <h3>Logout</h3>
+                                    <p>Exit the system</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Customer Registration -->
+        <div id="customerScreen" class="screen">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header text-white" style="background: var(--primary-orange);">
+                            <h4 class="mb-0">Customer Registration</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Customer Name *</label>
+                                <input type="text" class="form-control" id="custName">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="custPhone">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" id="custAddress" rows="2"></textarea>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success btn-lg" onclick="registerCustomer()">Register Customer</button>
+                                <button class="btn btn-outline-secondary" onclick="showScreen('dashboardScreen')">Back to Dashboard</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Order Entry -->
+        <div id="orderScreen" class="screen">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header text-white" style="background: var(--primary-orange);">
+                            <h4 class="mb-0">Menu</h4>
+                        </div>
+                        <div class="card-body" id="menuContainer"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card order-summary">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Order Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="orderItems"><p class="text-muted">No items selected</p></div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Running Total:</strong>
+                                <strong id="runningTotal">Rs. 0</strong>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-success w-100 mb-2" onclick="placeOrder()">Place Order</button>
+                            <button class="btn btn-outline-secondary w-100" onclick="showScreen('dashboardScreen')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 5: Payment & Receipt -->
+        <div id="paymentScreen" class="screen">
+            <div class="row justify-content-center">
+                <div class="col-md-7">
+                    <div class="card receipt-box">
+                        <div class="card-body text-center p-4">
+                            <h3 class="mb-0">RestoPoS Restaurant</h3>
+                            <p class="text-muted mb-3">Thank you for dining with us!</p>
+                            <hr>
+                            <div class="text-start mb-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>Bill Ref:</strong><br>
+                                        <span id="billRef"></span>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <strong>Date:</strong><br>
+                                        <span id="billDate"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">Item</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="billItems"></tbody>
+                            </table>
+                            <hr>
+                            <div class="text-start">
+                                <div class="d-flex justify-content-between"><span>Subtotal:</span><span id="billSubtotal"></span></div>
+                                <div class="d-flex justify-content-between"><span>Tax (18%):</span><span id="billTax"></span></div>
+                                <div class="d-flex justify-content-between"><span>Service Charge (1%):</span><span id="billService"></span></div>
+                                <hr>
+                                <div class="d-flex justify-content-between h5">
+                                    <strong>Grand Total:</strong>
+                                    <strong id="billTotal"></strong>
+                                </div>
+                            </div>
+                            <hr>
+                            <div id="paymentSection">
+                                <h5>Payment Method</h5>
+                                <div class="btn-group w-100 mb-3">
+                                    <button class="btn btn-outline-success" onclick="processPayment('Cash')">Cash</button>
+                                    <button class="btn btn-outline-primary" onclick="processPayment('Card')">Card</button>
+                                </div>
+                            </div>
+                            <div id="paymentSuccess" style="display:none;">
+                                <div class="alert alert-success">Payment Successful!</div>
+                                <p class="text-muted">Payment Method: <span id="payMethod"></span></p>
+                            </div>
+                            <p class="h5 text-success">Thank You!</p>
+                            <p class="text-muted small">Visit Again</p>
+                            <div class="d-grid gap-2 mt-4 no-print">
+                                <button class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+                                <button class="btn btn-success" onclick="newOrder()">New Order</button>
+                                <button class="btn btn-outline-secondary" onclick="showScreen('dashboardScreen')">Dashboard</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 bg-light text-center no-print">
+        <span class="text-muted">RestoPoS &copy; 2026 - Restaurant Point of Sale</span>
+    </footer>
+
+    <script>
+        // Menu data - exact 19 items from original code
+        const menuItems = [
+            // South Indian
+            {id: 1, name: "Rava Dosa", category: "South Indian", price: 70},
+            {id: 2, name: "Masala Dosa", category: "South Indian", price: 75},
+            {id: 3, name: "Sada Dosa", category: "South Indian", price: 60},
+            {id: 4, name: "Idli Plate", category: "South Indian", price: 40},
+            {id: 5, name: "Vada Plate", category: "South Indian", price: 50},
+            // Chinese
+            {id: 6, name: "Chinese Bhel", category: "Chinese", price: 25},
+            {id: 7, name: "Manchurian Soup", category: "Chinese", price: 50},
+            {id: 8, name: "Singapore Soup", category: "Chinese", price: 75},
+            // Chicken
+            {id: 9, name: "Chicken 65", category: "Chicken", price: 120},
+            {id: 10, name: "Chicken Crispy", category: "Chicken", price: 135},
+            {id: 11, name: "Chicken Manchurian", category: "Chicken", price: 130},
+            // Rice & Noodles
+            {id: 12, name: "Egg Fried Rice", category: "Rice & Noodles", price: 85},
+            {id: 13, name: "Egg Fried Noodles", category: "Rice & Noodles", price: 90},
+            {id: 14, name: "Chicken Fried Rice", category: "Rice & Noodles", price: 100},
+            {id: 15, name: "Chicken Fried Noodles", category: "Rice & Noodles", price: 110},
+            {id: 16, name: "Chicken Triple Rice", category: "Rice & Noodles", price: 130},
+            {id: 17, name: "Chicken Triple Noodles", category: "Rice & Noodles", price: 150},
+            {id: 18, name: "Veg Triple Rice", category: "Rice & Noodles", price: 110},
+            {id: 19, name: "Veg Triple Noodles", category: "Rice & Noodles", price: 124}
+        ];
+
+        let currentOrder = {};
+        let currentCustomer = null;
+
+        // Load from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('restopos_order');
+            if (saved) currentOrder = JSON.parse(saved);
+        }
+
+        function saveState() {
+            localStorage.setItem('restopos_order', JSON.stringify(currentOrder));
+        }
+
+        // Generate reference ID matching original format
+        function generateRefId() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const chars = letters + '0123456789';
+            let ref = '';
+            for (let i = 0; i < 6; i++) ref += letters[Math.floor(Math.random() * 26)];
+            for (let i = 0; i < 4; i++) ref += chars[Math.floor(Math.random() * chars.length)];
+            for (let i = 0; i < 2; i++) ref += chars[Math.floor(Math.random() * chars.length)];
+            return ref;
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if (screenId === 'orderScreen') renderMenu();
+        }
+
+        function doLogin() {
+            const username = document.getElementById('loginUsername').value || 'Cashier';
+            document.getElementById('navUser').textContent = `Welcome, ${username}`;
+            showScreen('dashboardScreen');
+        }
+
+        function doLogout() {
+            document.getElementById('navUser').textContent = '';
+            currentOrder = {};
+            saveState();
+            showScreen('loginScreen');
+        }
+
+        function registerCustomer() {
+            const name = document.getElementById('custName').value;
+            if (!name) { alert('Please enter customer name'); return; }
+            currentCustomer = {
+                name: name.toUpperCase(),
+                phone: document.getElementById('custPhone').value,
+                refId: generateRefId()
+            };
+            alert(`Customer registered!\nReference ID: ${currentCustomer.refId}`);
+            document.getElementById('custName').value = '';
+            document.getElementById('custPhone').value = '';
+            document.getElementById('custAddress').value = '';
+            showScreen('dashboardScreen');
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menuContainer');
+            const categories = {};
+            menuItems.forEach(item => {
+                if (!categories[item.category]) categories[item.category] = [];
+                categories[item.category].push(item);
+            });
+
+            let html = '';
+            for (const [cat, items] of Object.entries(categories)) {
+                html += `<h5 class="category-header mt-3 mb-3">${cat}</h5><div class="row">`;
+                items.forEach(item => {
+                    const qty = currentOrder[item.id] || 0;
+                    html += `
+                        <div class="col-md-6 mb-2">
+                            <div class="card menu-item">
+                                <div class="card-body d-flex justify-content-between align-items-center py-2">
+                                    <div>
+                                        <strong>${item.name}</strong><br>
+                                        <span class="text-success">Rs. ${item.price}</span>
+                                    </div>
+                                    <input type="number" class="form-control qty-input"
+                                           data-id="${item.id}" data-price="${item.price}" data-name="${item.name}"
+                                           min="0" max="10" value="${qty}" onchange="updateQty(this)">
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+            }
+            container.innerHTML = html;
+            updateOrderSummary();
+        }
+
+        function updateQty(input) {
+            const id = parseInt(input.dataset.id);
+            const qty = parseInt(input.value) || 0;
+            if (qty > 0) currentOrder[id] = qty;
+            else delete currentOrder[id];
+            saveState();
+            updateOrderSummary();
+        }
+
+        function updateOrderSummary() {
+            let total = 0;
+            let html = '';
+            let hasItems = false;
+
+            for (const [id, qty] of Object.entries(currentOrder)) {
+                const item = menuItems.find(m => m.id === parseInt(id));
+                if (item && qty > 0) {
+                    hasItems = true;
+                    const lineTotal = qty * item.price;
+                    total += lineTotal;
+                    html += `<div class="d-flex justify-content-between mb-1">
+                        <span>${qty}x ${item.name}</span>
+                        <span>Rs. ${lineTotal}</span>
+                    </div>`;
+                }
+            }
+
+            document.getElementById('orderItems').innerHTML = hasItems ? html : '<p class="text-muted">No items selected</p>';
+            document.getElementById('runningTotal').textContent = `Rs. ${total}`;
+        }
+
+        function placeOrder() {
+            if (Object.keys(currentOrder).length === 0) {
+                alert('Please select at least one item');
+                return;
+            }
+
+            // Calculate bill
+            let subtotal = 0;
+            let itemsHtml = '';
+
+            for (const [id, qty] of Object.entries(currentOrder)) {
+                const item = menuItems.find(m => m.id === parseInt(id));
+                if (item && qty > 0) {
+                    const lineTotal = qty * item.price;
+                    subtotal += lineTotal;
+                    itemsHtml += `<tr>
+                        <td class="text-start">${item.name}</td>
+                        <td class="text-center">${qty}</td>
+                        <td class="text-end">Rs. ${lineTotal}</td>
+                    </tr>`;
+                }
+            }
+
+            const tax = Math.round(subtotal * 0.18);
+            const service = Math.round(subtotal * 0.01);
+            const total = subtotal + tax + service;
+
+            // Update receipt
+            document.getElementById('billRef').textContent = generateRefId();
+            document.getElementById('billDate').textContent = new Date().toLocaleString('en-IN');
+            document.getElementById('billItems').innerHTML = itemsHtml;
+            document.getElementById('billSubtotal').textContent = `Rs. ${subtotal}`;
+            document.getElementById('billTax').textContent = `Rs. ${tax}`;
+            document.getElementById('billService').textContent = `Rs. ${service}`;
+            document.getElementById('billTotal').textContent = `Rs. ${total}`;
+
+            document.getElementById('paymentSection').style.display = 'block';
+            document.getElementById('paymentSuccess').style.display = 'none';
+
+            showScreen('paymentScreen');
+        }
+
+        function processPayment(method) {
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('paymentSuccess').style.display = 'block';
+            document.getElementById('payMethod').textContent = method;
+        }
+
+        function newOrder() {
+            currentOrder = {};
+            saveState();
+            showScreen('orderScreen');
+        }
+
+        // Initialize
+        loadState();
+    </script>
+</body>
+</html>
