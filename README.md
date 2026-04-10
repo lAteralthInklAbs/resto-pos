@@ -9,6 +9,14 @@
 
 [**Live Demo**](https://lateralthinklabs.github.io/resto-pos/) | [Documentation](docs/architecture.md)
 
+## Try It Now
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lAteralthInklAbs/resto-pos)
+
+Click the button above to launch the full app with database in your browser. No installation needed.
+
+Or try the [static demo](https://lateralthinklabs.github.io/resto-pos/) (no server, runs in browser only).
+
 ## Why This Exists
 
 Fast food cashiers need a simple POS. This handles:
