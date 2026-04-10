@@ -96,10 +96,10 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card dashboard-btn h-100 text-center bg-secondary text-white">
-                                <div class="card-body py-5">
+                            <div class="card dashboard-btn h-100 text-center" style="background: #17a2b8;" onclick="showOrdersList()">
+                                <div class="card-body py-5 text-white">
                                     <h3>View Orders</h3>
-                                    <p>Coming soon</p>
+                                    <p>Order history & receipts</p>
                                 </div>
                             </div>
                         </div>
@@ -116,7 +116,42 @@
             </div>
         </div>
 
-        <!-- Screen 3: Customer Registration -->
+        <!-- Screen 3: View Orders -->
+        <div id="ordersListScreen" class="screen">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Order History</h2>
+                <button class="btn btn-success" onclick="showScreen('orderScreen')">New Order</button>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Order ID</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="noOrdersMsg" class="card-body text-center py-5" style="display:none;">
+                    <h4 class="text-muted">No orders yet</h4>
+                    <p class="text-muted">Orders will appear here once created.</p>
+                    <button class="btn btn-success" onclick="showScreen('orderScreen')">Create First Order</button>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-outline-secondary" onclick="showScreen('dashboardScreen')">Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Customer Registration -->
         <div id="customerScreen" class="screen">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -283,15 +318,106 @@
 
         let currentOrder = {};
         let currentCustomer = null;
+        let savedOrders = [];
 
         // Load from localStorage
         function loadState() {
             const saved = localStorage.getItem('restopos_order');
             if (saved) currentOrder = JSON.parse(saved);
+            const savedOrdersStr = localStorage.getItem('restopos_orders');
+            if (savedOrdersStr) savedOrders = JSON.parse(savedOrdersStr);
         }
 
         function saveState() {
             localStorage.setItem('restopos_order', JSON.stringify(currentOrder));
+        }
+
+        function saveOrders() {
+            localStorage.setItem('restopos_orders', JSON.stringify(savedOrders));
+        }
+
+        function showOrdersList() {
+            renderOrdersList();
+            showScreen('ordersListScreen');
+        }
+
+        function renderOrdersList() {
+            const tbody = document.getElementById('ordersTableBody');
+            const noOrdersMsg = document.getElementById('noOrdersMsg');
+
+            if (savedOrders.length === 0) {
+                tbody.innerHTML = '';
+                noOrdersMsg.style.display = 'block';
+                tbody.parentElement.parentElement.querySelector('table').style.display = 'none';
+                return;
+            }
+
+            noOrdersMsg.style.display = 'none';
+            tbody.parentElement.parentElement.querySelector('table').style.display = 'table';
+
+            let html = '';
+            savedOrders.forEach((order, index) => {
+                const itemsSummary = order.items.slice(0, 2).map(i => `${i.qty}x ${i.name}`).join(', ');
+                const moreItems = order.items.length > 2 ? ` +${order.items.length - 2} more` : '';
+                const statusBadge = order.status === 'paid'
+                    ? '<span class="badge bg-success">Paid</span>'
+                    : '<span class="badge bg-warning text-dark">Pending</span>';
+                const actionBtn = order.status === 'paid'
+                    ? `<button class="btn btn-sm btn-outline-primary" onclick="viewSavedReceipt(${index})">View Receipt</button>`
+                    : `<button class="btn btn-sm btn-success" onclick="paySavedOrder(${index})">Pay Now</button>`;
+
+                html += `<tr>
+                    <td>${savedOrders.length - index}</td>
+                    <td><code>ORD-${order.id}</code></td>
+                    <td>${itemsSummary}${moreItems}</td>
+                    <td>Rs. ${order.total}</td>
+                    <td>${statusBadge}</td>
+                    <td>${order.date}</td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function viewSavedReceipt(index) {
+            const order = savedOrders[index];
+            displayReceipt(order, true);
+        }
+
+        function paySavedOrder(index) {
+            const order = savedOrders[index];
+            displayReceipt(order, false);
+        }
+
+        function displayReceipt(order, isPaid) {
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `<tr>
+                    <td class="text-start">${item.name}</td>
+                    <td class="text-center">${item.qty}</td>
+                    <td class="text-end">Rs. ${item.lineTotal}</td>
+                </tr>`;
+            });
+
+            document.getElementById('billRef').textContent = order.refId;
+            document.getElementById('billDate').textContent = order.date;
+            document.getElementById('billItems').innerHTML = itemsHtml;
+            document.getElementById('billSubtotal').textContent = `Rs. ${order.subtotal}`;
+            document.getElementById('billTax').textContent = `Rs. ${order.tax}`;
+            document.getElementById('billService').textContent = `Rs. ${order.service}`;
+            document.getElementById('billTotal').textContent = `Rs. ${order.total}`;
+
+            if (isPaid) {
+                document.getElementById('paymentSection').style.display = 'none';
+                document.getElementById('paymentSuccess').style.display = 'block';
+                document.getElementById('payMethod').textContent = order.paymentMethod || 'Cash';
+            } else {
+                document.getElementById('paymentSection').style.display = 'block';
+                document.getElementById('paymentSuccess').style.display = 'none';
+                window.currentPayingOrderId = order.id;
+            }
+
+            showScreen('paymentScreen');
         }
 
         // Generate reference ID matching original format
@@ -413,12 +539,14 @@
             // Calculate bill
             let subtotal = 0;
             let itemsHtml = '';
+            let orderItems = [];
 
             for (const [id, qty] of Object.entries(currentOrder)) {
                 const item = menuItems.find(m => m.id === parseInt(id));
                 if (item && qty > 0) {
                     const lineTotal = qty * item.price;
                     subtotal += lineTotal;
+                    orderItems.push({ id: item.id, name: item.name, qty, price: item.price, lineTotal });
                     itemsHtml += `<tr>
                         <td class="text-start">${item.name}</td>
                         <td class="text-center">${qty}</td>
@@ -430,10 +558,28 @@
             const tax = Math.round(subtotal * 0.18);
             const service = Math.round(subtotal * 0.01);
             const total = subtotal + tax + service;
+            const refId = generateRefId();
+            const dateStr = new Date().toLocaleString('en-IN');
+
+            // Save order to history
+            const newOrder = {
+                id: savedOrders.length + 1,
+                refId: refId,
+                items: orderItems,
+                subtotal: subtotal,
+                tax: tax,
+                service: service,
+                total: total,
+                status: 'pending',
+                date: dateStr
+            };
+            savedOrders.unshift(newOrder);
+            saveOrders();
+            window.currentPayingOrderId = newOrder.id;
 
             // Update receipt
-            document.getElementById('billRef').textContent = generateRefId();
-            document.getElementById('billDate').textContent = new Date().toLocaleString('en-IN');
+            document.getElementById('billRef').textContent = refId;
+            document.getElementById('billDate').textContent = dateStr;
             document.getElementById('billItems').innerHTML = itemsHtml;
             document.getElementById('billSubtotal').textContent = `Rs. ${subtotal}`;
             document.getElementById('billTax').textContent = `Rs. ${tax}`;
@@ -447,9 +593,20 @@
         }
 
         function processPayment(method) {
+            // Mark order as paid
+            if (window.currentPayingOrderId) {
+                const order = savedOrders.find(o => o.id === window.currentPayingOrderId);
+                if (order) {
+                    order.status = 'paid';
+                    order.paymentMethod = method;
+                    saveOrders();
+                }
+            }
             document.getElementById('paymentSection').style.display = 'none';
             document.getElementById('paymentSuccess').style.display = 'block';
             document.getElementById('payMethod').textContent = method;
+            currentOrder = {};
+            saveState();
         }
 
         function newOrder() {

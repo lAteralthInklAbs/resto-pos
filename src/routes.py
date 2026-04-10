@@ -84,6 +84,14 @@ def new_customer():
     return render_template("customer_form.html")
 
 
+@bp.route("/orders")
+@login_required
+def orders_list():
+    """View all orders."""
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+    return render_template("orders.html", orders=orders)
+
+
 @bp.route("/orders/new", methods=["GET", "POST"])
 @login_required
 def new_order():

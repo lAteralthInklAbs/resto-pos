@@ -171,6 +171,47 @@ class TestReceiptRoutes:
             assert b"Receipt" in response.data or b"RCP-" in response.data
 
 
+class TestOrdersListRoutes:
+    """Tests for orders list functionality."""
+
+    def test_orders_list_empty(self, client):
+        """Test GET /orders with no orders shows empty state."""
+        # Login first
+        client.post("/login", data={"username": "admin", "password": "admin"})
+        response = client.get("/orders")
+        assert response.status_code == 200
+        assert b"No orders yet" in response.data
+
+    def test_orders_list_with_data(self, app, client, seeded_db):
+        """Test GET /orders shows orders in table."""
+        with app.app_context():
+            from src.models import MenuItem, Order, OrderItem, db
+
+            # Create an order
+            menu_item = MenuItem.query.first()
+            order = Order()
+            db.session.add(order)
+            db.session.commit()
+
+            order_item = OrderItem(
+                order_id=order.id,
+                menu_item_id=menu_item.id,
+                quantity=2,
+                unit_price=menu_item.price,
+            )
+            db.session.add(order_item)
+            db.session.commit()
+
+            # Login
+            client.post("/login", data={"username": "admin", "password": "admin"})
+
+            response = client.get("/orders")
+            assert response.status_code == 200
+            assert b"Order History" in response.data
+            assert b"ORD-" in response.data
+            assert b"Pending" in response.data
+
+
 class TestAPIRoutes:
     """Tests for API endpoints."""
 
