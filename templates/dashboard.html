@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - RestoPoS{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <h2>Welcome, Cashier!</h2>
+    <p class="text-muted">Restaurant Point of Sale System</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <a href="{{ url_for('main.new_customer') }}" class="text-decoration-none">
+                    <div class="card h-100 text-center dashboard-card">
+                        <div class="card-body py-5">
+                            <h3 class="card-title">New Customer</h3>
+                            <p class="text-muted">Register a new customer</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('main.new_order') }}" class="text-decoration-none">
+                    <div class="card h-100 text-center dashboard-card bg-success text-white">
+                        <div class="card-body py-5">
+                            <h3 class="card-title">New Order</h3>
+                            <p>Create a new order</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 text-center dashboard-card bg-secondary text-white">
+                    <div class="card-body py-5">
+                        <h3 class="card-title">View Orders</h3>
+                        <p>Coming soon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('main.logout') }}" class="text-decoration-none">
+                    <div class="card h-100 text-center dashboard-card bg-danger text-white">
+                        <div class="card-body py-5">
+                            <h3 class="card-title">Logout</h3>
+                            <p>Exit the system</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

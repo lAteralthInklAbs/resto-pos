@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - RestoPoS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Payment</h4>
+                <small>Order: {{ order.reference_id }}</small>
+            </div>
+            <div class="card-body">
+                <h5>Order Summary</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Unit Price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td>{{ item.menu_item.name }}</td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-end">Rs. {{ item.unit_price }}</td>
+                            <td class="text-end">Rs. {{ item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                            <td class="text-end">Rs. {{ subtotal }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end">Tax (18%):</td>
+                            <td class="text-end">Rs. {{ tax }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end">Service Charge (1%):</td>
+                            <td class="text-end">Rs. {{ service_charge }}</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td colspan="3" class="text-end"><strong>Grand Total:</strong></td>
+                            <td class="text-end"><strong>Rs. {{ total }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <form method="POST" id="paymentForm">
+                    <h5 class="mt-4">Payment Method</h5>
+                    <div class="btn-group w-100 mb-3" role="group">
+                        <input type="radio" class="btn-check" name="payment_method" id="cash" value="cash" checked>
+                        <label class="btn btn-outline-success" for="cash">Cash</label>
+
+                        <input type="radio" class="btn-check" name="payment_method" id="card" value="card">
+                        <label class="btn btn-outline-primary" for="card">Card</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg" onclick="return confirm('Confirm payment of Rs. {{ total }}?')">
+                            Pay Rs. {{ total }}
+                        </button>
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-danger">Cancel Order</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
