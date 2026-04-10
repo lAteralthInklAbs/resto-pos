@@ -1,6 +1,6 @@
 """Tests for database models."""
-import pytest
-from src.models import MenuItem, Customer, Order, OrderItem, Payment
+
+from src.models import Customer, MenuItem, Order, OrderItem, Payment
 
 
 class TestMenuItem:
@@ -9,27 +9,27 @@ class TestMenuItem:
     def test_create_menu_item(self, app, db_session):
         """Test creating and querying a menu item."""
         with app.app_context():
-            item = MenuItem(name='Test Item', category='Test', price=100)
+            item = MenuItem(name="Test Item", category="Test", price=100)
             db_session.session.add(item)
             db_session.session.commit()
 
-            queried = MenuItem.query.filter_by(name='Test Item').first()
+            queried = MenuItem.query.filter_by(name="Test Item").first()
             assert queried is not None
             assert queried.price == 100
-            assert queried.category == 'Test'
+            assert queried.category == "Test"
             assert queried.available is True
 
     def test_menu_item_to_dict(self, app, db_session):
         """Test MenuItem to_dict method."""
         with app.app_context():
-            item = MenuItem(name='Test Item', category='Test', price=50)
+            item = MenuItem(name="Test Item", category="Test", price=50)
             db_session.session.add(item)
             db_session.session.commit()
 
             data = item.to_dict()
-            assert data['name'] == 'Test Item'
-            assert data['price'] == 50
-            assert data['available'] is True
+            assert data["name"] == "Test Item"
+            assert data["price"] == 50
+            assert data["available"] is True
 
 
 class TestCustomer:
@@ -38,19 +38,19 @@ class TestCustomer:
     def test_create_customer(self, app, db_session):
         """Test customer creation with auto-generated reference ID."""
         with app.app_context():
-            customer = Customer(name='John Doe', phone='9876543210')
+            customer = Customer(name="John Doe", phone="9876543210")
             db_session.session.add(customer)
             db_session.session.commit()
 
             assert customer.reference_id is not None
             assert len(customer.reference_id) > 6
-            assert customer.name == 'John Doe'
+            assert customer.name == "John Doe"
 
     def test_customer_reference_id_unique(self, app, db_session):
         """Test that customer reference IDs are unique."""
         with app.app_context():
-            c1 = Customer(name='Customer 1')
-            c2 = Customer(name='Customer 2')
+            c1 = Customer(name="Customer 1")
+            c2 = Customer(name="Customer 2")
             db_session.session.add_all([c1, c2])
             db_session.session.commit()
 
@@ -68,10 +68,7 @@ class TestOrder:
             seeded_db.session.add(order)
 
             order_item = OrderItem(
-                order=order,
-                menu_item_id=menu_item.id,
-                quantity=3,
-                unit_price=menu_item.price
+                order=order, menu_item_id=menu_item.id, quantity=3, unit_price=menu_item.price
             )
             seeded_db.session.add(order_item)
             seeded_db.session.commit()
@@ -88,7 +85,7 @@ class TestOrder:
             db_session.session.add(order)
             db_session.session.commit()
 
-            assert order.status == 'pending'
+            assert order.status == "pending"
 
 
 class TestPayment:
@@ -107,13 +104,13 @@ class TestPayment:
                 tax_amount=180,
                 service_charge=10,
                 total=1190,
-                payment_method='cash'
+                payment_method="cash",
             )
             seeded_db.session.add(payment)
             seeded_db.session.commit()
 
             assert payment.receipt_number is not None
-            assert payment.receipt_number.startswith('RCP-')
+            assert payment.receipt_number.startswith("RCP-")
             assert payment.total == 1190
 
     def test_payment_receipt_unique(self, app, seeded_db):
@@ -124,10 +121,22 @@ class TestPayment:
             seeded_db.session.add_all([o1, o2])
             seeded_db.session.commit()
 
-            p1 = Payment(order_id=o1.id, subtotal=100, tax_amount=18,
-                        service_charge=1, total=119, payment_method='cash')
-            p2 = Payment(order_id=o2.id, subtotal=200, tax_amount=36,
-                        service_charge=2, total=238, payment_method='card')
+            p1 = Payment(
+                order_id=o1.id,
+                subtotal=100,
+                tax_amount=18,
+                service_charge=1,
+                total=119,
+                payment_method="cash",
+            )
+            p2 = Payment(
+                order_id=o2.id,
+                subtotal=200,
+                tax_amount=36,
+                service_charge=2,
+                total=238,
+                payment_method="card",
+            )
             seeded_db.session.add_all([p1, p2])
             seeded_db.session.commit()
 

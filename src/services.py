@@ -1,4 +1,5 @@
 """Business logic services for RestoPoS."""
+
 import random
 import string
 from datetime import datetime
@@ -75,9 +76,9 @@ def generate_reference_id() -> str:
     """
     letters = string.ascii_uppercase
     digits = string.digits
-    part1 = ''.join(random.choice(letters) for _ in range(6))
-    part2 = ''.join(random.choice(letters + digits) for _ in range(4))
-    part3 = ''.join(random.choice(letters + digits) for _ in range(2))
+    part1 = "".join(random.choice(letters) for _ in range(6))
+    part2 = "".join(random.choice(letters + digits) for _ in range(4))
+    part3 = "".join(random.choice(letters + digits) for _ in range(2))
     return f"{part1}{part2}{part3}"
 
 
@@ -87,19 +88,21 @@ def generate_receipt_number() -> str:
     Returns:
         Unique receipt number string.
     """
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    suffix = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    suffix = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     return f"RCP-{timestamp}-{suffix}"
 
 
-def create_order_with_items(db, Order, OrderItem, MenuItem, quantities: dict, customer_id=None):
+def create_order_with_items(
+    db, order_model, order_item_model, menu_item_model, quantities: dict, customer_id=None
+):
     """Create an order with items.
 
     Args:
         db: Database session.
-        Order: Order model class.
-        OrderItem: OrderItem model class.
-        MenuItem: MenuItem model class.
+        order_model: Order model class.
+        order_item_model: OrderItem model class.
+        menu_item_model: MenuItem model class.
         quantities: Dict mapping menu_item_id to quantity.
         customer_id: Optional customer ID.
 
@@ -116,18 +119,18 @@ def create_order_with_items(db, Order, OrderItem, MenuItem, quantities: dict, cu
         raise ValueError("Cannot create order with no items")
 
     # Create order
-    order = Order(customer_id=customer_id)
+    order = order_model(customer_id=customer_id)
     db.session.add(order)
 
     # Add order items
     for menu_item_id, quantity in items_to_add.items():
-        menu_item = MenuItem.query.get(menu_item_id)
+        menu_item = menu_item_model.query.get(menu_item_id)
         if menu_item and menu_item.available:
-            order_item = OrderItem(
+            order_item = order_item_model(
                 order=order,
                 menu_item_id=menu_item_id,
                 quantity=quantity,
-                unit_price=menu_item.price
+                unit_price=menu_item.price,
             )
             db.session.add(order_item)
 

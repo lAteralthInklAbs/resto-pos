@@ -1,11 +1,13 @@
 """Tests for business logic services."""
+
 import pytest
+
 from src.services import (
+    calculate_service_charge,
     calculate_subtotal,
     calculate_tax,
-    calculate_service_charge,
     calculate_total,
-    generate_reference_id
+    generate_reference_id,
 )
 
 
@@ -23,9 +25,9 @@ class TestCalculateSubtotal:
     def test_calculate_subtotal(self):
         """Test subtotal calculation with known items."""
         items = [
-            MockOrderItem(2, 70),   # 2 x Rava Dosa = 140
+            MockOrderItem(2, 70),  # 2 x Rava Dosa = 140
             MockOrderItem(1, 120),  # 1 x Chicken 65 = 120
-            MockOrderItem(3, 50),   # 3 x Vada Plate = 150
+            MockOrderItem(3, 50),  # 3 x Vada Plate = 150
         ]
         result = calculate_subtotal(items)
         assert result == 410
@@ -78,8 +80,8 @@ class TestCalculateTotal:
     def test_calculate_total(self):
         """Test total = subtotal + tax + service charge."""
         subtotal = 1000
-        tax = 180       # 18%
-        service = 10    # 1%
+        tax = 180  # 18%
+        service = 10  # 1%
         assert calculate_total(subtotal, tax, service) == 1190
 
     def test_calculate_total_zero(self):
@@ -117,27 +119,29 @@ class TestEmptyOrderValidation:
 
     def test_empty_order_raises(self):
         """Test that creating order with no items raises ValueError."""
-        from src.services import create_order_with_items
         from unittest.mock import MagicMock
 
+        from src.services import create_order_with_items
+
         mock_db = MagicMock()
-        mock_Order = MagicMock()
-        mock_OrderItem = MagicMock()
-        mock_MenuItem = MagicMock()
+        mock_order_model = MagicMock()
+        mock_order_item_model = MagicMock()
+        mock_menu_item_model = MagicMock()
 
         with pytest.raises(ValueError, match="Cannot create order with no items"):
             create_order_with_items(
                 mock_db,
-                mock_Order,
-                mock_OrderItem,
-                mock_MenuItem,
-                {}  # Empty quantities
+                mock_order_model,
+                mock_order_item_model,
+                mock_menu_item_model,
+                {},  # Empty quantities
             )
 
     def test_zero_quantities_raises(self):
         """Test that all-zero quantities raises ValueError."""
-        from src.services import create_order_with_items
         from unittest.mock import MagicMock
+
+        from src.services import create_order_with_items
 
         mock_db = MagicMock()
 
@@ -147,5 +151,5 @@ class TestEmptyOrderValidation:
                 MagicMock(),
                 MagicMock(),
                 MagicMock(),
-                {1: 0, 2: 0, 3: 0}  # All zero quantities
+                {1: 0, 2: 0, 3: 0},  # All zero quantities
             )

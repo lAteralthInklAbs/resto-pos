@@ -7,7 +7,7 @@ Menu items and prices extracted from original code (7.menu_interface.py, 3.cashi
 - Rice & Noodles: All fried rice/noodles items
 """
 
-from src.models import db, MenuItem
+from src.models import MenuItem, db
 
 MENU_ITEMS = [
     # South Indian
@@ -16,17 +16,14 @@ MENU_ITEMS = [
     {"name": "Sada Dosa", "category": "South Indian", "price": 60},
     {"name": "Idli Plate", "category": "South Indian", "price": 40},
     {"name": "Vada Plate", "category": "South Indian", "price": 50},
-
     # Chinese
     {"name": "Chinese Bhel", "category": "Chinese", "price": 25},
     {"name": "Manchurian Soup", "category": "Chinese", "price": 50},
     {"name": "Singapore Soup", "category": "Chinese", "price": 75},
-
     # Chicken
     {"name": "Chicken 65", "category": "Chicken", "price": 120},
     {"name": "Chicken Crispy", "category": "Chicken", "price": 135},
     {"name": "Chicken Manchurian", "category": "Chicken", "price": 130},
-
     # Rice & Noodles
     {"name": "Egg Fried Rice", "category": "Rice & Noodles", "price": 85},
     {"name": "Egg Fried Noodles", "category": "Rice & Noodles", "price": 90},
